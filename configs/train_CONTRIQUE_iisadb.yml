@@ -1,0 +1,143 @@
+# general settings
+name: CONTRIQUE_iisadb
+model_type: GeneralIQAModel
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 123
+split_num: 10   # how many splits to use for k-fold validation
+save_final_results_dir: './experiments'
+
+# pseudo-label generation settings for WIISA
+define: &num_weak_labels 2  # number of pseudo-labels to generate
+define: &scale_low 0.65   # referred to as delta in the paper
+define: &scale_high 1.0
+define: &interpolation lanczos
+
+# dataset variables
+define: &dataset_path <YOUR_DATASET_PATH>  # FIXME: replace with your dataset path
+define: &split_file ./datasets/iisadb_splits.pkl
+
+# training variables
+# assuming 550 ground-truth images, batch_size of 8 and num_weak_labels of 2 ----> (550+550*2)/8=207 iter/epoch
+define: &num_epochs 20
+define: &val_freq 207
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: iisadb_train
+    type: IISADBDataset
+    dataset_path: *dataset_path
+    split_file: *split_file
+    mos_range: [0, 1]
+    lower_better: false
+    mos_normalize: false
+    num_weak_labels: *num_weak_labels
+    scale_low: *scale_low
+    scale_high: *scale_high
+    interpolation: *interpolation
+
+    augment:
+      hflip: true
+      vflip: true
+      center_crop: 1536
+    img_range: 1
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 20
+    batch_size_per_gpu: 8
+    dataset_enlarge_ratio: 1
+    prefetch_mode: ~
+
+  val_0:
+    name: iisadb_val
+    override_phase: val
+    type: IISADBDataset
+    dataset_path: *dataset_path
+    split_file: *split_file
+    mos_range: [0, 1]
+    lower_better: false
+    mos_normalize: false
+
+    num_worker_per_gpu: 20
+    batch_size_per_gpu: 1
+
+  val_1:
+    name: iisadb_test
+    override_phase: test
+    type: IISADBDataset
+    dataset_path: *dataset_path
+    split_file: *split_file
+    mos_range: [0, 1]
+    lower_better: false
+    mos_normalize: false
+
+    num_worker_per_gpu: 20
+    batch_size_per_gpu: 1
+
+# network structures
+network:
+  type: CONTRIQUE
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+train:
+  optim:
+    type: Adam
+    lr: !!float 1e-4
+
+  scheduler:
+    type: CosineAnnealingLR
+    T_max: 50
+    eta_min: 0
+
+  total_iter: 2000000
+  total_epoch: *num_epochs
+  warmup_iter: -1  # no warm up
+
+  # losses
+  mos_loss_opt:
+    type: MSELoss
+    loss_weight: !!float 1.0
+
+# validation settings
+val:
+  val_freq: *val_freq
+  save_img: false
+  pbar: true
+
+  key_metric: srcc # if this metric improve, update all metrics. If not specified, each best metric results will be updated separately
+  metrics:
+    srcc:
+      type: calculate_srcc
+
+    plcc:
+      type: calculate_plcc
+
+    rmse:
+      type: calculate_rmse
+
+    mae:
+      type: calculate_mae
+
+# logging settings
+logger:
+  print_freq: 25
+  save_checkpoint_freq: *val_freq
+  save_latest_freq: *val_freq
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
+
+find_unused_parameters: True
