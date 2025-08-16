@@ -783,5 +783,57 @@ DEFAULT_CONFIGS = OrderedDict(
             'metric_mode': 'NR',
             'score_range': '0, 1',
         },
+        'arniqa-iisadb': {
+            'metric_opts': {
+                'type': 'ARNIQA',
+                'regressor_dataset': 'iisadb',
+                'pretrained': True,
+            },
+            'metric_mode': 'NR',
+            'score_range': '0, 1',
+        },
+        'contrique-iisadb': {
+            'metric_opts': {
+                'type': 'CONTRIQUE',
+                'pretrained': True,
+            },
+            'metric_mode': 'NR',
+            'score_range': '0, 1',
+        },
+        'clipiqa+-iisadb': {
+            'metric_opts': {
+                'type': 'CLIPIQA',
+                'model_type': 'clipiqa+_rn50_iisadb',
+            },
+            'metric_mode': 'NR',
+            'score_range': '0, 1',
+        },
+        'qualiclip+-iisadb': {
+            'metric_opts': {
+                'type': 'QualiCLIP',
+                'model_type': 'qualiclip+-iisadb',
+                'pretrained': True,
+            },
+            'metric_mode': 'NR',
+            'score_range': '0, 1',
+        },
+        'dbcnn-iisadb': {
+            'metric_opts': {
+                'type': 'DBCNN',
+                'pretrained': 'iisadb'
+            },
+            'metric_mode': 'NR',
+            'score_range': '~0, ~1',
+        },
+        'topiq_nr-iisadb': {
+            'metric_opts': {
+                'type': 'CFANet',
+                'semantic_model_name': 'resnet50',
+                'model_name': 'cfanet_nr_iisadb_res50',
+                'use_ref': False,
+            },
+            'metric_mode': 'NR',
+            'score_range': '~0, ~1',
+        },
     }
 )

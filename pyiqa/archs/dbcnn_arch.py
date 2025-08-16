@@ -25,6 +25,7 @@ default_model_urls = {
     'livem': get_url_from_name('DBCNN_LIVEM-698474e3.pth'),
     'koniq': get_url_from_name('DBCNN_KonIQ10k-2de81c0a.pth'),
     'scnn': get_url_from_name('DBCNN_scnn-7ea73d75.pth'),
+    'iisadb': 'https://github.com/SonyResearch/IISA/releases/download/weights/DBCNN_iisadb.pth',
 }
 
 

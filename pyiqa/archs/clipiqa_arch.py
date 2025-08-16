@@ -25,6 +25,7 @@ default_model_urls = {
     'clipiqa+': get_url_from_name('CLIP-IQA+_learned_prompts-603f3273.pth'),
     'clipiqa+_rn50_512': get_url_from_name('CLIPIQA+_RN50_512-89f5d940.pth'),
     'clipiqa+_vitL14_512': get_url_from_name('CLIPIQA+_ViTL14_512-e66488f2.pth'),
+    'clipiqa+_rn50_iisadb': 'https://github.com/SonyResearch/IISA/releases/download/weights/CLIPIQA_iisadb.pth',
 }
 
 

@@ -45,6 +45,7 @@ default_model_urls = {
     'clive': get_url_from_name(name='regressor_clive.pth'),
     'flive': get_url_from_name(name='regressor_flive.pth'),
     'spaq': get_url_from_name(name='regressor_spaq.pth'),
+    'iisadb': 'https://github.com/SonyResearch/IISA/releases/download/weights/ARNIQA_iisadb.pth',
 }
 
 
@@ -100,11 +101,18 @@ class ARNIQA(nn.Module):
                                        nn.Linear(self.feat_dim * 2, 1))     # Initialize regressor
 
         if pretrained:
-            self.regressor: nn.Module = torch.hub.load_state_dict_from_url(
-                default_model_urls[self.regressor_dataset],
-                progress=True,
-                map_location='cpu',
-            )  # Load regressor from torch.hub as JIT model
+            if self.regressor_dataset == 'iisadb':
+                regressor_state_dict = torch.hub.load_state_dict_from_url(default_model_urls['iisadb'],
+                                                                          progress=True,
+                                                                          map_location='cpu')['params']
+                cleaned_state_dict = {k.replace('regressor.', ''): v for k, v in regressor_state_dict.items()}
+                self.regressor.load_state_dict(cleaned_state_dict)
+            else:
+                self.regressor: nn.Module = torch.hub.load_state_dict_from_url(
+                    default_model_urls[self.regressor_dataset],
+                    progress=True,
+                    map_location='cpu',
+                )  # Load regressor from torch.hub as JIT model
             self.regressor.eval()
 
         self.default_mean = torch.Tensor(IMAGENET_DEFAULT_MEAN).view(1, 3, 1, 1)

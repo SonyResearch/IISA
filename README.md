@@ -20,6 +20,7 @@ Gap Between Quality and Resolution*".
   <img src="assets/teaser_plot.jpg" width="65%" alt="Example profiles of how image quality varies with downscaling">
 </p>
 
+
 > **Abstract**: <br>
 > Image Quality Assessment (IQA) measures and predicts perceived image quality by human observers. Although recent
 > studies have highlighted the critical influence that variations in the scale of an image have on its perceived quality,
@@ -78,6 +79,42 @@ After downloading the IISA-DB dataset, ensure that the folder structure matches 
 |   |   ├── [374612387.jpg | 6246977871.jpg | 9470847928.jpg | ...]
 ```
 
+
+## Inference with Pre-trained Models
+Thanks to [torch.hub](https://pytorch.org/docs/stable/hub.html), you can leverage our pre-trained checkpoints for
+inference without the need to clone our repo. The code snippet below shows how to run inference with models pre-trained
+on the IISA-DB dataset. You have to change ```<METRIC_NAME>``` with one of the following: 
+- ```arniqa```: [ARNIQA](https://arxiv.org/abs/2310.14918)
+- ```clipiqa```: [CLIPIQA](https://arxiv.org/abs/2207.12396)
+- ```contrique```: [CONTRIQUE](https://arxiv.org/abs/2110.13266)
+- ```dbcnn```: [DBCNN](https://arxiv.org/abs/1907.02665)
+- ```qualiclip```: [QualiCLIP](https://arxiv.org/abs/2403.11176)
+- ```topiq```: [TOPIQ](https://arxiv.org/abs/2308.03060)
+
+```python
+import pyiqa
+from PIL import Image
+from torchvision.transforms import ToTensor
+import torch
+
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+# Load the pre-trained model
+model = torch.hub.load(repo_or_dir="SonyResearch/IISA", model="<METRIC_NAME>", device=device)    # The model is already in evaluation mode
+
+# Option 1: Inference using image tensor
+img = Image.open('assets/example_image.jpg').convert('RGB')
+img_tensor = ToTensor()(img).unsqueeze(0).to(device)    # The models expect non-normalized batched image tensors
+
+with torch.no_grad():
+    pred = model(img_tensor)
+
+print('Predicted IIS from tensor: ', pred.item())
+
+# Option 2: Inference using image path
+pred = model('assets/example_image.jpg')
+print('Predicted IIS from path: ', pred.item())
+```
 
 ## Training
 To train a model on the IISA-DB dataset, you have to first modify the ```dataset_path``` variable in the corresponding 

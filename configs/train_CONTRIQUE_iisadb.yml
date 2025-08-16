@@ -78,6 +78,7 @@ datasets:
 # network structures
 network:
   type: CONTRIQUE
+  pretrained: False
 
 # path
 path:

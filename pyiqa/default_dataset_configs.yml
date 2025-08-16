@@ -159,3 +159,9 @@ cgfiqa:
   dataroot_target: ./datasets/CGFIQA/
   meta_info_file: ./datasets/meta_info/meta_info_CGFIQADataset.csv
   split_index: 'official_split'
+
+iisadb:
+  name: IISADB
+  type: IISADBDataset
+  mos_range: [0, 1]
+  lower_better: false

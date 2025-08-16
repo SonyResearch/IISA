@@ -23,11 +23,30 @@ from pyiqa.utils.download_util import download_file_from_google_drive, DEFAULT_C
 
 model_weights_gdrive_id = "1pmaomNVFhDgPSREgHBzZSu-SuGzNJyEt"
 
+default_model_urls = {
+    'iisadb': 'https://github.com/SonyResearch/IISA/releases/download/weights/CONTRIQUE_iisadb.pth',
+}
+
 
 @ARCH_REGISTRY.register()
 class CONTRIQUE(nn.Module):
-    def __init__(self,
-                 ) -> None:
+    """
+    CONTRIQUE model implementation.
+
+    This class implements the CONTRIQUE model for image quality assessment, which combines a ResNet50 encoder
+    with a regressor network for predicting image quality scores.
+
+    Args:
+        pretrained (bool, optional): If True, loads the pretrained weights for the regressor. Default is True.
+
+    Attributes:
+        encoder (nn.Module): The ResNet50 encoder.
+        feat_dim (int): The feature dimension of the encoder.
+        regressor (nn.Module): The regressor network.
+        default_mean (torch.Tensor): The mean values for normalization.
+        default_std (torch.Tensor): The standard deviation values for normalization.
+    """
+    def __init__(self, pretrained: bool = True) -> None:
         super().__init__()
 
         self.encoder = resnet50()
@@ -54,6 +73,12 @@ class CONTRIQUE(nn.Module):
         self.regressor = nn.Sequential(nn.Linear(self.feat_dim * 2, self.feat_dim * 2),
                                             nn.ReLU(),
                                             nn.Linear(self.feat_dim * 2, 1))
+        if pretrained:
+            regressor_state_dict = torch.hub.load_state_dict_from_url(default_model_urls['iisadb'],
+                                                                      progress=True,
+                                                                      map_location='cpu')['params']
+            cleaned_state_dict = {k.replace('regressor.', ''): v for k, v in regressor_state_dict.items()}
+            self.regressor.load_state_dict(cleaned_state_dict)
 
         self.default_mean = torch.Tensor(IMAGENET_DEFAULT_MEAN).view(1, 3, 1, 1)
         self.default_std = torch.Tensor(IMAGENET_DEFAULT_STD).view(1, 3, 1, 1)

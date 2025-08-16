@@ -32,6 +32,7 @@ default_model_urls = {
     'qualiclip+-clive': get_url_from_name('QualiCLIP+_clive.pth'),
     'qualiclip+-flive': get_url_from_name('QualiCLIP+_flive.pth'),
     'qualiclip+-spaq': get_url_from_name('QualiCLIP+_spaq.pth'),
+    'qualiclip+-iisadb': 'https://github.com/SonyResearch/IISA/releases/download/weights/QualiCLIP_iisadb.pth',
 }
 
 
